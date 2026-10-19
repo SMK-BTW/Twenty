@@ -1,9 +1,3 @@
-"""End-to-end baseline run: data -> temporal split -> tune KNN on validation -> evaluate on test -> results/.
-
-Usage:
-    python scripts/run_baselines.py                    # full run (all users)
-    python scripts/run_baselines.py --user-fraction 0.2 --knn-k 50   # quick run
-"""
 import argparse
 import json
 import platform
@@ -16,11 +10,11 @@ import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from recsys.config import Config  # noqa: E402
-from recsys.data import load_pairs  # noqa: E402
-from recsys.metrics import evaluate, user_metrics  # noqa: E402
-from recsys.models import ItemKNN, MostPopular  # noqa: E402
-from recsys.split import build_dataset, temporal_splits  # noqa: E402
+from recsys.config import Config  
+from recsys.data import load_pairs
+from recsys.metrics import evaluate, user_metrics
+from recsys.models import ItemKNN, MostPopular 
+from recsys.split import build_dataset, temporal_splits
 
 
 def log(msg):
@@ -35,7 +29,6 @@ def run_model(model, ds, cfg):
     rec_idx = model.recommend(ds.eval_users, max(cfg.ks))
     rec_s = time.time() - t0
     rec_items = ds.item_ids[rec_idx]
-    # Same check as validate_recommendations() in the notebook: nothing the user already heard.
     for r, idx in zip(ds.eval_users[:500], rec_idx[:500]):
         seen = ds.X.indices[ds.X.indptr[r]:ds.X.indptr[r + 1]]
         assert not np.isin(idx, seen).any(), "recommended an already-listened song"
@@ -66,7 +59,7 @@ def diagnostics(ds, results, k=10):
     out["activity_bucket_train_items_range"] = edges
 
     pop = ds.item_popularity
-    pop_rank_pct = pd.Series(pop).rank(pct=True).to_numpy()  # 1.0 = most popular
+    pop_rank_pct = pd.Series(pop).rank(pct=True).to_numpy()
     head = pop_rank_pct >= 0.9
 
     rows = []
@@ -78,7 +71,6 @@ def diagnostics(ds, results, k=10):
         for b in ["light", "medium", "heavy"]:
             row[f"ndcg@{k}_{b}"] = ndcg[buckets == b].mean()
             row[f"hitrate@{k}_{b}"] = hit[buckets == b].mean()
-        # Organic (user-initiated) vs. non-organic (surfaced by Yandex's own recommender) held-out songs.
         for flag, label in [(1, "organic"), (0, "nonorganic")]:
             hits = total = 0
             for r, org in zip(rec_items, ds.target_organic):
@@ -129,7 +121,6 @@ def main():
     for d in data_summary:
         log(d)
 
-    # 1) Tune KNN's k on the validation window only.
     tuning_rows = []
     for k in cfg.knn_k_grid:
         log(f"validation: ItemKNN k={k}")
@@ -142,7 +133,6 @@ def main():
     best_k = int(tuning_df.dropna(subset=["k"]).sort_values(cfg.tune_metric, ascending=False).iloc[0]["k"])
     log(f"best k = {best_k} by {cfg.tune_metric}")
 
-    # 2) Refit on train+val and evaluate once on the test window.
     final_rows, recs = [], {}
     for model in [MostPopular(), ItemKNN(k=best_k)]:
         log(f"test: {model.name}")
@@ -157,7 +147,6 @@ def main():
     table = pd.DataFrame(final_rows)
     diag = diagnostics(ds_test, recs)
 
-    # 3) Save everything needed to reproduce and report.
     out = cfg.results_dir
     table.to_csv(out / "baseline_table.csv", index=False)
     tuning_df.to_csv(out / "knn_tuning_validation.csv", index=False)
@@ -172,7 +161,7 @@ def main():
             sample_rows += [{"model": label, "uid": int(u), "rank": i + 1, "item_id": int(it)} for i, it in enumerate(items)]
     pd.DataFrame(sample_rows).to_csv(out / "sample_recommendations.csv", index=False)
 
-    import sklearn, scipy, duckdb  # noqa: E401
+    import sklearn, scipy, duckdb
     with open(out / "run_config.json", "w") as f:
         json.dump({"config": cfg.to_dict(), "best_k": best_k, "python": platform.python_version(),
                    "platform": platform.platform(),
