@@ -51,7 +51,7 @@ def describe(name, split, ds):
 
 
 def diagnostics(ds, results, k=10):
-    """Breakdowns that explain *why* the models differ (inputs for the discrepancy analysis)."""
+    """extra breakdowns"""
     out = {}
     hist = np.diff(ds.X.indptr)[ds.eval_users]
     buckets = pd.qcut(hist, q=3, labels=["light", "medium", "heavy"])

@@ -1,4 +1,4 @@
-"""Download the raw listens file and turn it into one row per (user, song) first listen."""
+"""loading and cleaning the data"""
 from pathlib import Path
 
 import duckdb
@@ -10,7 +10,7 @@ from .config import Config
 
 
 def download_raw(cfg: Config) -> Path:
-    """Fetch the pinned listens parquet (cached locally after the first call)."""
+    """download the listens file"""
     path = hf_hub_download(
         repo_id=cfg.hf_repo,
         filename=cfg.hf_file,
@@ -22,11 +22,7 @@ def download_raw(cfg: Config) -> Path:
 
 
 def build_pairs(raw_path: Path, min_played_ratio_pct: int) -> pd.DataFrame:
-    """Collapse meaningful listens to one row per (uid, item_id).
-
-    `ts` is the user's *first* meaningful listen of the song, so a pair that falls in a held-out
-    window is always a song that is new to that user. `is_organic` is taken from that first listen.
-    """
+    """one row per user and song"""
     con = duckdb.connect()
     df = con.execute(
         """
@@ -48,7 +44,7 @@ def build_pairs(raw_path: Path, min_played_ratio_pct: int) -> pd.DataFrame:
 
 
 def sample_users(pairs: pd.DataFrame, fraction: float, seed: int) -> pd.DataFrame:
-    """Keep whole histories of a seeded random subset of users (never sample individual rows)."""
+    """sample some users"""
     if fraction >= 1.0:
         return pairs
     users = np.sort(pairs["uid"].unique())
@@ -58,7 +54,7 @@ def sample_users(pairs: pd.DataFrame, fraction: float, seed: int) -> pd.DataFram
 
 
 def load_pairs(cfg: Config) -> pd.DataFrame:
-    """Raw file -> cached pairs parquet -> user sample."""
+    """load the pairs"""
     cache = cfg.processed_dir / f"pairs_played{cfg.min_played_ratio_pct}.parquet"
     if cache.exists():
         pairs = pd.read_parquet(cache)

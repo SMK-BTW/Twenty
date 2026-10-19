@@ -14,7 +14,6 @@ the data pipeline, a naive benchmark, and a course-level baseline:
 python -m venv .venv
 # Windows: .venv\Scripts\activate    macOS/Linux: source .venv/bin/activate
 pip install -r requirements.txt
-pytest -q tests                         # synthetic checks, no download
 python scripts/run_baselines.py         # full run: downloads ~370 MB once, then about 10-15 min on a laptop
 python scripts/run_baselines.py --user-fraction 0.2 --knn-k 50 --out results/quick   # ~1 min
 ```
@@ -63,6 +62,5 @@ Results are deterministic. No step is random except the optional user sample, wh
 ```
 src/recsys/   config.py  data.py  split.py  models.py  metrics.py
 scripts/      run_baselines.py
-tests/        test_pipeline.py
 Machine_Learning_Project.ipynb   # initial exploration / proposal notebook
 ```

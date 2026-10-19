@@ -1,4 +1,4 @@
-"""Top-K ranking metrics for implicit feedback. `recs` are raw item_ids, `targets` are sets of raw item_ids."""
+"""evaluation metrics"""
 import numpy as np
 
 
@@ -17,7 +17,7 @@ def user_metrics(recs, targets: set, k: int) -> dict:
 
 
 def evaluate(rec_item_ids: np.ndarray, targets: list, ks, n_catalog: int) -> dict:
-    """Average per-user metrics and add catalog coverage (share of the catalog recommended to anyone)."""
+    """average metrics over users"""
     totals = {}
     for recs, tgt in zip(rec_item_ids, targets):
         for k in ks:

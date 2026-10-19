@@ -1,4 +1,3 @@
-"""Global temporal split: one cutoff in time for every user, so nothing from the future leaks into training."""
 from dataclasses import dataclass
 
 import numpy as np
@@ -12,18 +11,13 @@ from .config import DAY, Config
 class Split:
     train: pd.DataFrame
     test: pd.DataFrame
-    train_end: int   # train uses ts < train_end
-    test_start: int  # test uses ts >= test_start (and ts < test_end)
+    train_end: int
+    test_start: int
     test_end: int
 
 
 def temporal_splits(pairs: pd.DataFrame, cfg: Config):
-    """Return (tuning split, final split).
-
-    timeline: |---- inner train ----|gap|-- val --|gap|-- test --|
-    tuning split: inner train -> val   (used to choose hyperparameters)
-    final split:  inner train + val -> test   (reported numbers)
-    """
+    """split by time"""
     t_end = int(pairs["ts"].max()) + 1
     test_start = t_end - cfg.test_days * DAY
     val_start = test_start - cfg.gap_seconds - cfg.val_days * DAY
@@ -40,16 +34,16 @@ def temporal_splits(pairs: pd.DataFrame, cfg: Config):
 
 @dataclass
 class Dataset:
-    """Training matrix plus held-out targets, with ids mapped to contiguous indices."""
-    X: sp.csr_matrix              # users x items, binary, training window only
-    user_ids: np.ndarray          # row index -> uid
-    item_ids: np.ndarray          # column index -> item_id
-    item_popularity: np.ndarray   # distinct training listeners per column
-    eval_users: np.ndarray        # row indices of users that have >=1 train and >=1 test pair
-    targets: list                 # per eval user: set of held-out item_ids (raw ids, may be outside catalog)
-    target_organic: list          # per eval user: dict item_id -> is_organic
-    n_test_pairs_total: int       # all held-out pairs of eval users
-    n_test_pairs_in_catalog: int  # ... of which the song is recommendable (in training catalog)
+    """data for training and eval"""
+    X: sp.csr_matrix
+    user_ids: np.ndarray
+    item_ids: np.ndarray
+    item_popularity: np.ndarray
+    eval_users: np.ndarray
+    targets: list
+    target_organic: list
+    n_test_pairs_total: int
+    n_test_pairs_in_catalog: int
 
 
 def build_dataset(split: Split, min_item_users: int) -> Dataset:
@@ -67,7 +61,7 @@ def build_dataset(split: Split, min_item_users: int) -> Dataset:
     X.data[:] = 1.0
     popularity = np.asarray(X.sum(axis=0)).ravel()
 
-    # Only users we know something about can be evaluated (cold-start users are out of scope here).
+    # only eval users that are in train
     test = split.test[split.test["uid"].isin(user_ids)]
     grouped = test.groupby("uid")
     eval_uids = np.array(sorted(grouped.groups.keys()), dtype=np.int64)
