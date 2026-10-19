@@ -1,0 +1,22 @@
+[15:16:10] loading pairs
+[15:16:11] 9,019,829 pairs, 9,207 users, 630,139 songs
+[15:16:22] {'split': 'tuning (train -> val)', 'train_pairs': 8456560, 'train_users': 9190, 'heldout_pairs': 285388, 'heldout_users': 7357, 'catalog_items': 66135, 'matrix_users': 9155, 'matrix_nnz': 6817677, 'density_pct': 1.126, 'eval_users': 7336, 'eval_pairs': 284962, 'eval_pairs_in_catalog_pct': 71.78}
+[15:16:22] {'split': 'final (train+val -> test)', 'train_pairs': 8742509, 'train_users': 9202, 'heldout_pairs': 276856, 'heldout_users': 7212, 'catalog_items': 67931, 'matrix_users': 9175, 'matrix_nnz': 7069539, 'density_pct': 1.1343, 'eval_users': 7202, 'eval_pairs': 276702, 'eval_pairs_in_catalog_pct': 72.92}
+[15:16:22] validation: ItemKNN k=20
+[15:18:14] {'precision@10': 0.0286, 'recall@10': 0.0116, 'ndcg@10': 0.031, 'hitrate@10': 0.178, 'coverage@10': 0.1254}
+[15:18:14] validation: ItemKNN k=50
+[15:20:08] {'precision@10': 0.0277, 'recall@10': 0.0107, 'ndcg@10': 0.0302, 'hitrate@10': 0.1715, 'coverage@10': 0.1088}
+[15:20:08] validation: ItemKNN k=100
+[15:22:03] {'precision@10': 0.0274, 'recall@10': 0.0107, 'ndcg@10': 0.0302, 'hitrate@10': 0.1716, 'coverage@10': 0.0996}
+[15:22:03] validation: ItemKNN k=200
+[15:24:01] {'precision@10': 0.0281, 'recall@10': 0.0106, 'ndcg@10': 0.031, 'hitrate@10': 0.1731, 'coverage@10': 0.0942}
+[15:24:02] best k = 20 by ndcg@10
+[15:24:02] test: MostPopular
+[15:24:03] {'precision@10': 0.0133, 'recall@10': 0.0067, 'ndcg@10': 0.0151, 'hitrate@10': 0.0878, 'coverage@10': 0.0023}
+[15:24:03] test: ItemKNN-cosine
+[15:25:59] {'precision@10': 0.0272, 'recall@10': 0.0116, 'ndcg@10': 0.0299, 'hitrate@10': 0.1733, 'coverage@10': 0.1169}
+
+                model  precision@10  recall@10  ndcg@10  hitrate@10  coverage@10  precision@50  recall@50  ndcg@50  hitrate@50  coverage@50
+          MostPopular        0.0133     0.0067   0.0151      0.0878       0.0023        0.0092     0.0179   0.0158      0.2026       0.0054
+ItemKNN-cosine (k=20)        0.0272     0.0116   0.0299      0.1733       0.1169        0.0219     0.0427   0.0354      0.4218       0.3275
+[15:25:59] results written to C:\Users\Arbab\OneDrive\Desktop\Projects\ml_class_proj\results

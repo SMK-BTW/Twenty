@@ -1,0 +1,47 @@
+{
+  "activity_bucket_train_items_range": {
+    "light": [
+      1,
+      401
+    ],
+    "medium": [
+      402,
+      992
+    ],
+    "heavy": [
+      993,
+      6255
+    ]
+  },
+  "breakdown": [
+    {
+      "model": "MostPopular",
+      "ndcg@10_light": 0.021275631093175366,
+      "hitrate@10_light": 0.10329029571012079,
+      "ndcg@10_medium": 0.013350720102748929,
+      "hitrate@10_medium": 0.07833333333333334,
+      "ndcg@10_heavy": 0.010765761399550202,
+      "hitrate@10_heavy": 0.08163265306122448,
+      "recall@10_organic_targets": 0.005303973441228343,
+      "recall@10_nonorganic_targets": 0.002735607996392605,
+      "mean_pop_percentile@10": 0.9998355644382296,
+      "head10pct_share@10": 1.0,
+      "unique_items@10": 154
+    },
+    {
+      "model": "ItemKNN-cosine (k=20)",
+      "ndcg@10_light": 0.04203920195331566,
+      "hitrate@10_light": 0.20408163265306123,
+      "ndcg@10_medium": 0.027247436609150365,
+      "hitrate@10_medium": 0.16458333333333333,
+      "ndcg@10_heavy": 0.020299977157532453,
+      "hitrate@10_heavy": 0.15118700541441066,
+      "recall@10_organic_targets": 0.0075863678804855275,
+      "recall@10_nonorganic_targets": 0.006899143243649482,
+      "mean_pop_percentile@10": 0.9149786509687977,
+      "head10pct_share@10": 0.7950985837267426,
+      "unique_items@10": 7944
+    }
+  ],
+  "jaccard@10_MostPopular_vs_ItemKNN-cosine (k=20)": 0.09788602615586521
+}
