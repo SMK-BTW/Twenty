@@ -10,13 +10,20 @@ the data pipeline, a naive benchmark, and a course-level baseline:
 
 ## Quick start
 
-```bash
-python -m venv .venv
-# Windows: .venv\Scripts\activate    macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
-python scripts/run_baselines.py         # full run: downloads ~370 MB once, then about 10-15 min on a laptop
-python scripts/run_baselines.py --user-fraction 0.2 --knn-k 50 --out results/quick   # ~1 min
+Open `Machine_Learning_Project.ipynb` and run all cells. The first code cell installs the exact
+pinned library versions:
+
 ```
+numpy==2.1.3 pandas==2.2.3 scipy==1.14.1 scikit-learn==1.6.1 duckdb==1.1.3
+pyarrow==18.1.0 huggingface_hub==0.26.5 tabulate==0.9.0
+```
+
+Running locally, use a fresh virtual environment (`python -m venv .venv`) so these don't clash with
+other projects. The first run downloads about 750 MB, and the full pipeline takes about 10-15 min on a laptop. For a quick run, set `"user_fraction": 0.2` and
+`"knn_k_grid": [50]` in the `CFG` cell (about 1 min).
+
+On Colab, use the badge at the top of the notebook. Restart the runtime once after the install cell if
+Colab asks.
 
 Tested with Python 3.10 on Windows (8 GB RAM). The pinned versions also install on Python 3.13 (Colab).
 Results are deterministic. No step is random except the optional user sample, which uses `seed=42`.
@@ -47,6 +54,9 @@ Results are deterministic. No step is random except the optional user sample, wh
 
 ## Outputs (`results/`)
 
+All results are shown in the notebook's saved outputs. Running the notebook also writes these files
+to `results/`, which is not committed (it is in `.gitignore`):
+
 | File | Contents |
 |---|---|
 | `baseline_table.md` / `.csv` | Final test metrics for both models (plus validation NDCG/recall) |
@@ -55,12 +65,11 @@ Results are deterministic. No step is random except the optional user sample, wh
 | `diagnostics_breakdown.csv`, `diagnostics.json` | Metrics by user activity (light/medium/heavy), organic vs. non-organic targets, popularity bias, overlap between models |
 | `sample_recommendations.csv` | Example output in the `uid, rank, item_id` format |
 | `run_config.json` | Exact config, best *k*, Python and library versions |
-| `run_log.txt` | Console log of the run |
 
 ## Layout
 
-```
-src/recsys/   config.py  data.py  split.py  models.py  metrics.py
-scripts/      run_baselines.py
-Machine_Learning_Project.ipynb   # initial exploration / proposal notebook
-```
+Everything is in `Machine_Learning_Project.ipynb`:
+
+1. **setup**: pinned installs
+2. **initial exploration (proposal)**: 100k-row sample of `multi_event.parquet` (seeded), event types, cleaning, `validate_recommendations`
+3. **baseline pipeline**: config, data, split, models, metrics and validation, tuning, baseline table, diagnostics, saving results

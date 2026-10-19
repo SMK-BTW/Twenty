@@ -1,3 +1,0 @@
-split,train_pairs,train_users,heldout_pairs,heldout_users,catalog_items,matrix_users,matrix_nnz,density_pct,eval_users,eval_pairs,eval_pairs_in_catalog_pct
-tuning (train -> val),8456560,9190,285388,7357,66135,9155,6817677,1.126,7336,284962,71.78
-final (train+val -> test),8742509,9202,276856,7212,67931,9175,7069539,1.1343,7202,276702,72.92
