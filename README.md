@@ -15,18 +15,17 @@ pinned library versions:
 
 ```
 numpy==2.1.3 pandas==2.2.3 scipy==1.14.1 scikit-learn==1.6.1 duckdb==1.1.3
-pyarrow==18.1.0 huggingface_hub==0.26.5 tabulate==0.9.0
+pyarrow==18.1.0 huggingface_hub==0.26.5
 ```
 
 Running locally, use a fresh virtual environment (`python -m venv .venv`) so these don't clash with
-other projects. The first run downloads about 750 MB, and the full pipeline takes about 10-15 min on a laptop. For a quick run, set `"user_fraction": 0.2` and
-`"knn_k_grid": [50]` in the `CFG` cell (about 1 min).
+other projects. The first run downloads about 750 MB (kept in `data/`), and the full pipeline takes about 10-15 min on a laptop.
 
 On Colab, use the badge at the top of the notebook. Restart the runtime once after the install cell if
 Colab asks.
 
 Tested with Python 3.10 on Windows (8 GB RAM). The pinned versions also install on Python 3.13 (Colab).
-Results are deterministic. No step is random except the optional user sample, which uses `seed=42`.
+Results are deterministic. The baseline pipeline has no random steps, and the exploration sample uses `REPEATABLE (42)`.
 
 ## Pipeline
 
@@ -34,8 +33,7 @@ Results are deterministic. No step is random except the optional user sample, wh
    `dd6f3a19…`. It has 46.5M listens, 9,238 users, 877k songs, and spans about 300 days. This is the
    listen-only subset of `multi_event.parquet`, which the exploration notebook used.
 2. **Cleaning** (DuckDB): keep listens with `played_ratio_pct > 50`. Collapse to one row per
-   (user, song), timestamped at the user's **first** such listen. The result is 9.0M pairs, cached
-   to `data/processed/`.
+   (user, song), timestamped at the user's **first** such listen. The result is 9.0M pairs.
 3. **Split**: a **global temporal split**. One cutoff applies to everyone, so no future data leaks
    into training.
    ```
@@ -49,22 +47,8 @@ Results are deterministic. No step is random except the optional user sample, wh
    the split to avoid leakage).
 5. **Evaluation**: users with at least 1 training song and at least 1 test song. Metrics are
    Precision, Recall, NDCG, and HitRate @10 and @50, plus catalog coverage. Held-out songs outside the
-   catalog count as misses. Their share is reported as `eval_pairs_in_catalog_pct`, an upper bound on
-   achievable recall.
-
-## Outputs (`results/`)
-
-All results are shown in the notebook's saved outputs. Running the notebook also writes these files
-to `results/`, which is not committed (it is in `.gitignore`):
-
-| File | Contents |
-|---|---|
-| `baseline_table.md` / `.csv` | Final test metrics for both models (plus validation NDCG/recall) |
-| `knn_tuning_validation.csv` | KNN *k* grid on the validation window |
-| `data_summary.csv` | Sizes, density and catalog reachability for each split |
-| `diagnostics_breakdown.csv`, `diagnostics.json` | Metrics by user activity (light/medium/heavy), organic vs. non-organic targets, popularity bias, overlap between models |
-| `sample_recommendations.csv` | Example output in the `uid, rank, item_id` format |
-| `run_config.json` | Exact config, best *k*, Python and library versions |
+   catalog count as misses. The split cell prints their share, which is an upper bound on achievable
+   recall.
 
 ## Layout
 
@@ -72,4 +56,4 @@ Everything is in `Machine_Learning_Project.ipynb`:
 
 1. **setup**: pinned installs
 2. **initial exploration (proposal)**: 100k-row sample of `multi_event.parquet` (seeded), event types, cleaning, `validate_recommendations`
-3. **baseline pipeline**: config, data, split, models, metrics and validation, tuning, baseline table, diagnostics, saving results
+3. **baseline pipeline**: data, split, models, metrics and validation, tuning, baseline table, diagnostics
